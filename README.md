@@ -94,10 +94,11 @@ pip install -e .
 
 ```python
 from unsloth_mlx import FastLanguageModel, SFTTrainer, SFTConfig
+from datasets import load_dataset
 
-# Load any HuggingFace model
+# Load any HuggingFace model (1B model for quick start)
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name="mlx-community/Llama-3.2-3B-Instruct-4bit",
+    model_name="mlx-community/Llama-3.2-1B-Instruct-4bit",
     max_seq_length=2048,
     load_in_4bit=True,
 )
@@ -110,15 +111,19 @@ model = FastLanguageModel.get_peft_model(
     lora_alpha=16,
 )
 
+# Load a dataset (or create your own)
+dataset = load_dataset("yahma/alpaca-cleaned", split="train[:100]")
+
 # Train with SFTTrainer (same API as TRL!)
 trainer = SFTTrainer(
     model=model,
     train_dataset=dataset,
     tokenizer=tokenizer,
     args=SFTConfig(
+        output_dir="outputs",
         per_device_train_batch_size=2,
         learning_rate=2e-4,
-        max_steps=100,
+        max_steps=50,
     ),
 )
 trainer.train()
