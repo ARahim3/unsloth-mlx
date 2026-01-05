@@ -79,10 +79,15 @@ Local Mac (Unsloth-MLX)     →     Cloud GPU (Unsloth)
 # From source (recommended for now)
 git clone https://github.com/ARahim3/unsloth-mlx.git
 cd unsloth-mlx
+
+# Using uv (recommended - faster and more reliable)
+uv pip install -e .
+
+# Or using pip
 pip install -e .
 
 # PyPI coming soon!
-# pip install unsloth-mlx
+# uv pip install unsloth-mlx
 ```
 
 ## Quick Start
