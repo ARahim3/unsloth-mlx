@@ -94,7 +94,7 @@ If you have existing Unsloth code, migration is simple - just change the import!
 from unsloth import FastLanguageModel
 
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name="unsloth/llama-3-8b",
+    model_name="unsloth/Meta-Llama-3.1-8B-bnb-4bit",
     max_seq_length=2048,
     load_in_4bit=True,
 )
@@ -106,7 +106,7 @@ from unsloth_mlx import FastLanguageModel  # ← Only change!
 
 # For MLX, use mlx-community models
 model, tokenizer = FastLanguageModel.from_pretrained(
-    model_name="mlx-community/Llama-3-8B-Instruct-4bit",
+    model_name="mlx-community/Llama-3.2-8B-Instruct-4bit",
     max_seq_length=2048,
     load_in_4bit=True,
 )
@@ -238,10 +238,10 @@ Always call `FastLanguageModel.for_inference(model)` before generation:
 **Solution:** Use MLX community models:
 ```python
 # ❌ Don't use CUDA-specific models
-model_name = "unsloth/llama-3-8b"
+model_name = "unsloth/Meta-Llama-3.1-8B-bnb-4bit"
 
 # ✅ Use MLX community models
-model_name = "mlx-community/Llama-3-8B-Instruct-4bit"
+model_name = "mlx-community/Llama-3.2-8B-Instruct-4bit"
 ```
 
 ### Out of Memory

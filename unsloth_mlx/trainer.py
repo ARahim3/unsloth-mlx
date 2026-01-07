@@ -43,7 +43,7 @@ def prepare_dataset(
         >>>
         >>> # Load with custom split
         >>> dataset = prepare_dataset(
-        ...     "databricks/databricks-dolly-15k",
+        ...     "yahma/alpaca-cleaned",
         ...     split="train[:1000]"
         ... )
     """

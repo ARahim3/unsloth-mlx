@@ -63,8 +63,8 @@ def main():
 
     print("\nLoading a real dataset from HuggingFace Hub...")
     print("You can use:")
-    print("  - prepare_dataset('timdettmers/openassistant-guanaco')")
-    print("  - prepare_dataset('databricks/databricks-dolly-15k')")
+    print("  - prepare_dataset('yahma/alpaca-cleaned')")
+    print("  - prepare_dataset('mlabonne/FineTome-100k')")
     print("  - prepare_dataset(dataset_path='local/data.jsonl')")
     print("  - Any dataset compatible with HuggingFace datasets!")
 

@@ -2,7 +2,7 @@
 Vision Language Model (VLM) Support for Unsloth-MLX
 
 Provides support for Vision-Language models like:
-- Qwen2-VL / Qwen2.5-VL
+- Qwen3-VL (recommended)
 - LLaVA
 - Pixtral
 - And other VLMs supported by MLX-VLM
@@ -23,7 +23,7 @@ class FastVisionModel:
     for vision-language models, using MLX-VLM under the hood.
 
     Supported models:
-    - Qwen2-VL / Qwen2.5-VL (recommended)
+    - Qwen3-VL (recommended - 4B, 8B, 30B sizes available)
     - LLaVA 1.5 / 1.6
     - Pixtral
     - Idefics 2/3
@@ -33,7 +33,7 @@ class FastVisionModel:
         >>> from unsloth_mlx import FastVisionModel
         >>>
         >>> model, processor = FastVisionModel.from_pretrained(
-        ...     model_name="mlx-community/Qwen2-VL-2B-Instruct-4bit",
+        ...     model_name="mlx-community/Qwen3-VL-4B-Instruct-4bit",
         ...     max_seq_length=2048,
         ... )
         >>>
@@ -57,7 +57,7 @@ class FastVisionModel:
 
         Args:
             model_name: Model identifier from HuggingFace Hub
-                       (e.g., "mlx-community/Qwen2-VL-2B-Instruct-4bit")
+                       (e.g., "mlx-community/Qwen3-VL-4B-Instruct-4bit")
             max_seq_length: Maximum sequence length
             dtype: Data type (auto-selected by MLX)
             load_in_4bit: Whether model is 4-bit quantized
@@ -68,7 +68,7 @@ class FastVisionModel:
 
         Example:
             >>> model, processor = FastVisionModel.from_pretrained(
-            ...     "mlx-community/Qwen2-VL-2B-Instruct-4bit"
+            ...     "mlx-community/Qwen3-VL-4B-Instruct-4bit"
             ... )
         """
 
@@ -253,7 +253,7 @@ class VLMSFTTrainer:
         >>> from unsloth_mlx import FastVisionModel, VLMSFTTrainer
         >>>
         >>> model, processor = FastVisionModel.from_pretrained(
-        ...     "mlx-community/Qwen2-VL-2B-Instruct-4bit"
+        ...     "mlx-community/Qwen3-VL-4B-Instruct-4bit"
         ... )
         >>> model = FastVisionModel.get_peft_model(model, r=16)
         >>>
