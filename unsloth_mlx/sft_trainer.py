@@ -349,7 +349,20 @@ class SFTTrainer:
         return False
 
     def _prepare_training_data(self) -> str:
-        """Prepare training data in MLX-LM compatible format."""
+        """Prepare training data in MLX-LM compatible format.
+
+        Supports automatic conversion of various dataset formats:
+        - Alpaca: {"instruction": "...", "input": "...", "output": "..."}
+        - ShareGPT: {"conversations": [{"from": "human", "value": "..."}]}
+        - ChatML: {"messages": [{"role": "user", "content": "..."}]}
+        - Text: {"text": "..."}
+        - Completions: {"prompt": "...", "completion": "..."}
+        """
+        from unsloth_mlx.chat_templates import (
+            detect_dataset_format,
+            alpaca_to_text,
+            apply_chat_template_to_sample,
+        )
 
         # Create training and validation data files
         train_file = self.output_dir / "train.jsonl"
@@ -357,30 +370,59 @@ class SFTTrainer:
 
         print(f"Preparing training data...")
 
+        # Detect format from first sample
+        if len(self.train_dataset) > 0:
+            detected_format = detect_dataset_format(self.train_dataset[0])
+            print(f"  Detected format: {detected_format}")
+
+        def format_sample(sample) -> dict:
+            """Convert a sample to mlx-lm compatible format."""
+            # 1. User-provided formatting function takes priority
+            if self.formatting_func:
+                formatted = self.formatting_func(sample)
+                if isinstance(formatted, str):
+                    return {"text": formatted}
+                return formatted
+
+            # 2. Already in mlx-lm compatible format
+            if 'text' in sample:
+                return {"text": sample['text']}
+            if 'messages' in sample:
+                return {"messages": sample['messages']}
+            if 'prompt' in sample and 'completion' in sample:
+                return {"prompt": sample['prompt'], "completion": sample['completion']}
+
+            # 3. Custom text field specified
+            if self.dataset_text_field and self.dataset_text_field in sample:
+                return {"text": sample[self.dataset_text_field]}
+
+            # 4. Auto-convert known formats
+            # Alpaca format: instruction/input/output -> text
+            if 'instruction' in sample and 'output' in sample:
+                text = alpaca_to_text(sample)
+                return {"text": text}
+
+            # ShareGPT format: conversations -> messages (ChatML)
+            if 'conversations' in sample:
+                role_mapping = {'human': 'user', 'gpt': 'assistant', 'system': 'system'}
+                messages = []
+                for turn in sample['conversations']:
+                    role = role_mapping.get(turn.get('from', '').lower(), 'user')
+                    messages.append({'role': role, 'content': turn.get('value', '')})
+                return {"messages": messages}
+
+            # 5. Fallback: try to apply chat template if messages-like structure
+            if 'content' in sample or 'response' in sample:
+                return {"text": sample.get('content') or sample.get('response', '')}
+
+            # 6. Last resort: warn and use raw sample (will likely fail)
+            print(f"  Warning: Unknown format for sample with keys {list(sample.keys())}")
+            print(f"  Consider using formatting_func or dataset_text_field parameter")
+            return sample
+
         with open(train_file, 'w') as f:
             for idx, sample in enumerate(self.train_dataset):
-                # Format the sample
-                if self.formatting_func:
-                    # Use custom formatting function
-                    formatted = self.formatting_func(sample)
-                    if isinstance(formatted, str):
-                        # Text format
-                        formatted_sample = {"text": formatted}
-                    else:
-                        formatted_sample = formatted
-                elif 'messages' in sample:
-                    # Chat format
-                    formatted_sample = {"messages": sample['messages']}
-                elif 'text' in sample:
-                    # Text format
-                    formatted_sample = {"text": sample['text']}
-                elif self.dataset_text_field and self.dataset_text_field in sample:
-                    # Custom text field
-                    formatted_sample = {"text": sample[self.dataset_text_field]}
-                else:
-                    # Try to infer format
-                    formatted_sample = sample
-
+                formatted_sample = format_sample(sample)
                 f.write(json.dumps(formatted_sample) + '\n')
 
         num_samples = idx + 1
@@ -391,10 +433,8 @@ class SFTTrainer:
         if self.eval_dataset:
             with open(valid_file, 'w') as f:
                 for sample in self.eval_dataset:
-                    if 'messages' in sample:
-                        f.write(json.dumps({"messages": sample['messages']}) + '\n')
-                    elif 'text' in sample:
-                        f.write(json.dumps({"text": sample['text']}) + '\n')
+                    formatted_sample = format_sample(sample)
+                    f.write(json.dumps(formatted_sample) + '\n')
             print(f"✓ Prepared validation set")
         else:
             # Reuse training data for validation

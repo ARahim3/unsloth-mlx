@@ -61,6 +61,16 @@ from unsloth_mlx.vlm import (
     load_vlm_dataset,
 )
 
+# Chat Templates and Dataset Formatting (Unsloth-compatible)
+from unsloth_mlx.chat_templates import (
+    detect_dataset_format,
+    standardize_sharegpt,
+    convert_to_mlx_format,
+    get_formatting_func,
+    apply_chat_template_to_sample,
+    alpaca_to_text,
+)
+
 __all__ = [
     # Core
     "FastLanguageModel",
@@ -102,4 +112,11 @@ __all__ = [
     "get_training_config",
     "create_reward_function",
     "load_vlm_dataset",
+    # Chat Templates and Dataset Formatting
+    "detect_dataset_format",
+    "standardize_sharegpt",
+    "convert_to_mlx_format",
+    "get_formatting_func",
+    "apply_chat_template_to_sample",
+    "alpaca_to_text",
 ]
